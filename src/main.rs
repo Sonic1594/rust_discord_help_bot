@@ -16,7 +16,7 @@ of the fifth month, on the two thousand and twenty-first year after
 christ.
 
 I am coded in rust, and my files can be found here
-<git url placeholder>
+<https://github.com/Sonic1594/rust_discord_help_bot/tree/master>
 ";
 const HELP_MESSAGE: &str = "
 
