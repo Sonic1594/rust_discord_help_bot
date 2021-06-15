@@ -11,3 +11,4 @@ serenity = { default-features = false, features = ["client", "gateway", "rustls_
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 rand = "0.8.3"
 regex = "1.5.4"
+csv = "1.1"
