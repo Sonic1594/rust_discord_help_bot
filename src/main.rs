@@ -31,10 +31,6 @@ const HELP_MESSAGE: &str = "
 peepeepoopoo
 
 ";
-const HEADS: &str = "heads!";
-const TAILS: &str = "tails!";
-const EDGE: &str = "edge!";
-const WRINKLE: &str = "bro my brain is so fuckin wrinkly right now.";
  
 struct Handler {
     insults: Insults,
@@ -79,15 +75,15 @@ impl EventHandler for Handler {
             "flip" => {
                 let rng: i32 = rand::thread_rng().gen_range(0..1001);
                 if rng < 500 {
-                    if let Err(why) = msg.channel_id.say(&ctx.http, HEADS).await {
+                    if let Err(why) = msg.channel_id.say(&ctx.http, "Heads!").await {
                         println!("Error sending message: {:?}", why);
                     }
                 } else if rng > 500 {
-                    if let Err(why) = msg.channel_id.say(&ctx.http, TAILS).await {
+                    if let Err(why) = msg.channel_id.say(&ctx.http, "Tails!").await {
                         println!("Error sending message: {:?}", why);
                     }
                } else {
-                    if let Err(why) = msg.channel_id.say(&ctx.http, EDGE).await {
+                    if let Err(why) = msg.channel_id.say(&ctx.http, "Edge!").await {
                         println!("Error sending message: {:?}", why);
                     }
                 }
@@ -124,11 +120,11 @@ impl EventHandler for Handler {
             }
 
             "wrinkle" => {
-                if let Err(why) = msg.channel_id.say(&ctx.http, WRINKLE).await {
+                if let Err(why) = msg.channel_id.say(&ctx.http, "Bro my brain is so fuckin wrinkly right now!").await {
                     println!("Error sending message: {:?}", why);
                 }
             }
-
+            
             _ => (),
         }
         if dice_roll.is_match(&msg.content) {
@@ -204,33 +200,7 @@ fn roll_dice (mut dice: (i32, i32)) -> i32 {
     total
 }
 
-/*
-fn insult_generator () -> Result<String, Box<dyn Error>> {
-    let mut insult = String::from("thou");
-    let mut record = StringRecord::new();
-    //49 by 2 in terms of index
-    
-    println!("pass1");
 
-    let mut rng = rand::thread_rng();
-
-    let mut rdr = Reader::from_path("resources/insults.csv")?;
-    for count in 0..3 {
-        let mut rcount = 0;
-        let row = rng.gen_range(0..50);
-        for result in rdr.records() {
-            record = result?;
-            if rcount == row {
-                break;
-            }
-            rcount += 1;
-        }
-        insult.push(' ');
-        insult.push_str(&record[count]);
-    } 
-    Ok(insult)
-}
-*/
 
 struct Insults {
     adjectives: Vec<String>,
