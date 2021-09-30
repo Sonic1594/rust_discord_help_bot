@@ -1,4 +1,5 @@
 use std::env;
+use lazy_static::lazy_static;
 use regex::Regex;
 use rand::{
     Rng,
@@ -40,11 +41,13 @@ struct Handler {
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         
-        
         let content = &msg.content;
+        
+        lazy_static! {
+            static ref PARSER: Regex = Regex::new(r"^!([0-9a-z]+)( (.+))?$").unwrap();
+        }
 
-        let content_caps = match Regex::new(r"^!([0-9a-z]+)( (.+))?$").unwrap()
-            .captures(content) {
+        let content_caps = match PARSER.captures(content) {
                 Some(content_caps) => content_caps,
                 None => return,
             };
@@ -58,45 +61,34 @@ impl EventHandler for Handler {
         };
 
 
-        let dice_roll = Regex::new(r"^!(\d*?)[Dd](\d+?)$").unwrap();
-        let insult = Regex::new(r"^!insult (<@!\d+>)").unwrap();
+        
+        
    
         //let mut rdr = csv::Reader::from_reader(io::stdin());
 
 
-        match command {
+        if let Err(why) = match command {
 
             "peepeepoopoo" => {
-                if let Err(why) = msg.channel_id.say(&ctx.http, HELP_MESSAGE).await {
-                    println!("Error sending message: {:?}", why);
-                }
+                msg.channel_id.say(&ctx.http, HELP_MESSAGE).await 
             }
         
             "flip" => {
                 let rng: i32 = rand::thread_rng().gen_range(0..1001);
                 if rng < 500 {
-                    if let Err(why) = msg.channel_id.say(&ctx.http, "Heads!").await {
-                        println!("Error sending message: {:?}", why);
-                    }
+                    msg.channel_id.say(&ctx.http, "Heads!").await
                 } else if rng > 500 {
-                    if let Err(why) = msg.channel_id.say(&ctx.http, "Tails!").await {
-                        println!("Error sending message: {:?}", why);
-                    }
-               } else {
-                    if let Err(why) = msg.channel_id.say(&ctx.http, "Edge!").await {
-                        println!("Error sending message: {:?}", why);
-                    }
+                    msg.channel_id.say(&ctx.http, "Tails!").await
+                } else {
+                    msg.channel_id.say(&ctx.http, "Edge!").await 
                 }
             }
 
             "origin" => {
-                if let Err(why) = msg.channel_id.say(&ctx.http, ORIGIN_STORY).await {
-                    println!("Error sending message: {:?}", why);
-                }
+                msg.channel_id.say(&ctx.http, ORIGIN_STORY).await 
             }
 
             "ping" => {
-
                 let channel = match msg.channel_id.to_channel(&ctx).await {
                     Ok(channel) => channel,
                     Err(why) => {
@@ -114,21 +106,28 @@ impl EventHandler for Handler {
                     .push(" channel")
                     .build();
 
-                if let Err(why) = msg.channel_id.say(&ctx.http, &response).await {
-                    println!("Error sending message {:?}", why);
-                }
+                msg.channel_id.say(&ctx.http, &response).await
             }
 
             "wrinkle" => {
-                if let Err(why) = msg.channel_id.say(&ctx.http, "Bro my brain is so fuckin wrinkly right now!").await {
-                    println!("Error sending message: {:?}", why);
-                }
+                msg.channel_id.say(&ctx.http, "Bro my brain is so fuckin wrinkly right now!").await
             }
             
-            _ => (),
+            _ => continue,
+        } {
+            println!("Error sending message: {:?}", why);
         }
-        if dice_roll.is_match(&msg.content) {
-            let caps = dice_roll.captures(content).unwrap();
+
+        lazy_static! {
+            static ref DICE_ROLL_RE: Regex = Regex::new(r"^!(\d*?)[Dd](\d+?)$").unwrap();
+        }
+
+        lazy_static! {
+            static ref INSULT_RE: Regex = Regex::new(r"^!insult (<@!\d+>)").unwrap();
+        }
+
+        if DICE_ROLL_RE.is_match(&msg.content) {
+            let caps = DICE_ROLL_RE.captures(content).unwrap();
             let front = caps.get(1).map_or("", |m| m.as_str());
             let back = caps.get(2).map_or("", |m| m.as_str());
 
@@ -146,8 +145,8 @@ impl EventHandler for Handler {
                     }
                 }
             }
-        } else if insult.is_match(&msg.content) {
-            let victim = insult.captures(content).unwrap();
+        } else if INSULT_RE.is_match(&msg.content) {
+            let victim = INSULT_RE.captures(content).unwrap();
             let victim = victim.get(1).map_or("", |m| m.as_str());
             if let Err(why) = msg.channel_id.say(&ctx.http, self.insults.say(victim))
                 .await {
